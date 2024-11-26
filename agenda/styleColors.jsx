@@ -1,4 +1,4 @@
-import { StyleSheet , Dimensions}from "react-native";
+import { Dimensions}from "react-native";
 
 const { width } = Dimensions.get('window');
 const dynamicFontSize = width * 0.06;
