@@ -49,7 +49,7 @@ const Pacientes = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',  // Fondo suave para un diseño limpio
+    backgroundColor: '#f9f9f9',
     padding: 20,
   },
   title: {
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    elevation: 5,  // Para la sombra en Android
+    elevation: 5,
   },
   patientName: {
     fontSize: 20,
