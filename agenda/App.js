@@ -9,7 +9,7 @@ import Pacientes from './scr/views/pacientes';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator(); // Crear Stack Navigator
 
-// Rutas para la navegacion entre pestañas 
+// Rutas para la navegación entre pestañas
 function InternalStack() {
   return (
     <Stack.Navigator>
@@ -22,7 +22,7 @@ function InternalStack() {
   );
 }
 
-// Rutas de la barra de navegacion 
+// Rutas de la barra de navegación
 function RootStack() {
   return (
     <Tab.Navigator initialRouteName="Inicio">
@@ -32,7 +32,7 @@ function RootStack() {
       />
       <Tab.Screen 
         name="Inicio" 
-        component={InternalStack} // Cambiar a InternalStack
+        component={InternalStack} // Navegación a través de un Stack
       />
       <Tab.Screen 
         name="Pacientes" 
@@ -44,9 +44,9 @@ function RootStack() {
 
 export default function App() {
   return (
-    <NavigationContainer style={styles.general}>
-        <RootStack />
-      </NavigationContainer>
+    <NavigationContainer>
+      <RootStack />
+    </NavigationContainer>
   );
 }
 
