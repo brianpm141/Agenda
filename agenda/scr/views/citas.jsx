@@ -16,29 +16,27 @@ export default function Citas() {
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [citas, setCitas] = useState([]);
-  const [pacientes, setPacientes] = useState({}); // Objeto para almacenar los pacientes por ID
+  const [pacientes, setPacientes] = useState({});
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
-    setShowPicker(false); // Cierra el picker
-    setDate(currentDate); // Actualiza la fecha seleccionada
+    setShowPicker(false);
+    setDate(currentDate); 
   };
 
   useEffect(() => {
     const db = getDatabase();
 
-    // Cargar los pacientes desde Firebase
     const pacientesRef = ref(db, "pacientes");
     onValue(pacientesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        setPacientes(data); // Almacena los pacientes en un objeto por ID
+        setPacientes(data); 
       } else {
         setPacientes({});
       }
     });
 
-    // Cargar las citas desde Firebase
     const citasRef = ref(db, "citas");
     onValue(citasRef, (snapshot) => {
       const data = snapshot.val();
@@ -48,9 +46,8 @@ export default function Citas() {
           ...data[key],
         }));
 
-        // Filtra las citas por la fecha seleccionada
         const filteredCitas = citasArray.filter(
-          (cita) => cita.fecha === date.toLocaleDateString("en-CA") // Formato: YYYY-MM-DD
+          (cita) => cita.fecha === date.toLocaleDateString("en-CA")
         );
 
         setCitas(filteredCitas);
@@ -62,7 +59,6 @@ export default function Citas() {
 
   return (
     <View style={styles.container}>
-      {/* Encabezado con picker y botón */}
       <View style={styles.head}>
         <View style={styles.labels}>
           <Text style={styles.label}>Buscar Fecha:</Text>
@@ -74,7 +70,7 @@ export default function Citas() {
             onPress={() => setShowPicker(true)}
           >
             <Text style={styles.pickerText}>
-              {date.toLocaleDateString()} {/* Muestra la fecha seleccionada */}
+              {date.toLocaleDateString()} 
             </Text>
           </TouchableOpacity>
         </View>
@@ -89,13 +85,30 @@ export default function Citas() {
         )}
       </View>
 
-      {/* Contenedor para mostrar la fecha seleccionada */}
       <View style={styles.citasfechaCont}>
         <Text style={styles.label}>
           Citas del día: <Text style={styles.fechaText}>{date.toLocaleDateString()}</Text>
         </Text>
 
-        {/* Lista de citas */}
+        <FlatList
+          data={citas}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.citaItem}>
+              <Text style={styles.citaText}>Hora: {item.hora}</Text>
+              <Text style={styles.citaText}>
+                Paciente: {pacientes[item.idPaciente]?.nombre || "Desconocido"}
+              </Text>
+            </View>
+          )}
+        />
+      </View>
+
+      <View style={styles.citasfechaCont}>
+        <Text style={styles.label}>
+          Siguientes citas
+        </Text>
+
         <FlatList
           data={citas}
           keyExtractor={(item) => item.id}
@@ -165,6 +178,7 @@ const styles = StyleSheet.create({
     marginTop: "5%",
     padding: "5%",
     width: "80%",
+    height : '35%',
     borderRadius: 15,
     borderWidth: 1,
     justifyContent: "center",
@@ -176,7 +190,7 @@ const styles = StyleSheet.create({
     color: azulMarinoPesado,
   },
   citaItem: {
-    marginTop: 10,
+    marginTop: '5%',
     padding: 10,
     backgroundColor: "#fff",
     borderRadius: 5,
