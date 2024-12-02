@@ -4,49 +4,37 @@ import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
+import { createDrawerNavigator } from "@react-navigation/drawer"; // Importar Drawer Navigator
 import { initializeAuth, getReactNativePersistence, onAuthStateChanged } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import app from "./scr/utils/firebaseConfig"; // Configuración de Firebase
+import app from "./scr/utils/firebaseConfig";
 import Home from "./scr/views/home";
 import Citas from "./scr/views/citas";
 import Pacientes from "./scr/views/pacientes";
-import { background } from "./styleColors";
-import Auth from "./scr/auth/auth";
 import NuevaCita from "./scr/views/nuevaCita";
 import ModificaCita from "./scr/views/modificaCita";
+import Sidebar from "./Sidebar";
+import Auth from "./scr/auth/auth";
+import { background } from "./styleColors";
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator(); // Crear Stack Navigator
+const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator(); // Crear Drawer Navigator
 
-// Configurar Auth con persistencia usando AsyncStorage
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage),
 });
 
-// Rutas para la navegación entre pestañas
 function InternalStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="Inicio"
-        component={Home}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="NuevaCita"
-        component={NuevaCita}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ModificaCita"
-        component={ModificaCita}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="Inicio" component={Home} options={{ headerShown: false }} />
+      <Stack.Screen name="NuevaCita" component={NuevaCita} options={{ headerShown: false }} />
+      <Stack.Screen name="ModificaCita" component={ModificaCita} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
 
-// Rutas de la barra de navegación
 function RootStack() {
   return (
     <Tab.Navigator initialRouteName="Inicio">
@@ -60,6 +48,7 @@ function RootStack() {
               style={{ width: size, height: size }}
             />
           ),
+          headerShown : false
         }}
       />
       <Tab.Screen
@@ -72,6 +61,7 @@ function RootStack() {
               style={{ width: size, height: size }}
             />
           ),
+          headerShown : false
         }}
       />
       <Tab.Screen
@@ -84,6 +74,7 @@ function RootStack() {
               style={{ width: size, height: size }}
             />
           ),
+          headerShown : false
         }}
       />
     </Tab.Navigator>
@@ -91,25 +82,18 @@ function RootStack() {
 }
 
 export default function App() {
-  const [user, setUser] = useState(null); // Usuario autenticado
-  const [loading, setLoading] = useState(true); // Estado de carga
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
-      setLoading(false); // Finaliza la verificación del estado
+      setUser(user ? user : null);
+      setLoading(false);
     });
-
-    // Limpia el listener al desmontar el componente
     return () => unsubscribe();
   }, []);
 
   if (loading) {
-    // Muestra un indicador de carga mientras verifica la sesión
     return (
       <SafeAreaView style={[styles.background, styles.center]}>
         <ActivityIndicator size="large" color="#0000ff" />
@@ -118,7 +102,6 @@ export default function App() {
   }
 
   if (!user) {
-    // Usuario no autenticado: muestra el componente de autenticación
     return (
       <SafeAreaView style={styles.background}>
         <Auth />
@@ -126,10 +109,14 @@ export default function App() {
     );
   }
 
-  // Usuario autenticado: muestra la navegación principal
   return (
     <NavigationContainer>
-      <RootStack />
+      <Drawer.Navigator
+        drawerContent={(props) => <Sidebar {...props} />}
+        screenOptions={{ drawerPosition: "right" }}
+      >
+        <Drawer.Screen name="Principal" component={RootStack} />
+      </Drawer.Navigator>
     </NavigationContainer>
   );
 }
