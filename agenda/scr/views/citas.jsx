@@ -8,20 +8,23 @@ import {
   background,
   dynamicFontSizeMinimal,
   dynamicFontSizeOption,
-  dynamicFontSizeText,
   verde,
 } from "../../styleColors";
+import { useNavigation } from "@react-navigation/native";
 
 export default function Citas() {
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
-  const [citas, setCitas] = useState([]);
+  const [citasDelDia, setCitasDelDia] = useState([]);
+  const [siguientesCitas, setSiguientesCitas] = useState([]);
   const [pacientes, setPacientes] = useState({});
+
+  const navigation = useNavigation();
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShowPicker(false);
-    setDate(currentDate); 
+    setDate(currentDate);
   };
 
   useEffect(() => {
@@ -31,7 +34,7 @@ export default function Citas() {
     onValue(pacientesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        setPacientes(data); 
+        setPacientes(data);
       } else {
         setPacientes({});
       }
@@ -46,16 +49,51 @@ export default function Citas() {
           ...data[key],
         }));
 
-        const filteredCitas = citasArray.filter(
+        const currentDate = new Date();
+
+        // Ordenar citas por fecha y hora
+        citasArray.sort((a, b) => {
+          const fechaA = new Date(a.fecha);
+          const fechaB = new Date(b.fecha);
+
+          if (fechaA - fechaB !== 0) {
+            return fechaA - fechaB; // Ordenar por fecha
+          }
+
+          const horaA = a.hora.split(":").map(Number);
+          const horaB = b.hora.split(":").map(Number);
+
+          return horaA[0] - horaB[0] || horaA[1] - horaB[1]; // Ordenar por hora
+        });
+
+        const citasHoy = citasArray.filter(
           (cita) => cita.fecha === date.toLocaleDateString("en-CA")
         );
 
-        setCitas(filteredCitas);
+        const citasFuturas = citasArray.filter((cita) => {
+          const citaFecha = new Date(cita.fecha);
+          return citaFecha > currentDate;
+        });
+
+        setCitasDelDia(citasHoy);
+        setSiguientesCitas(citasFuturas);
       } else {
-        setCitas([]);
+        setCitasDelDia([]);
+        setSiguientesCitas([]);
       }
     });
   }, [date]);
+
+  const handleNuevaCita = () => {
+    navigation.navigate("Inicio", { screen: "NuevaCita" });
+  };
+
+  const handleModificaCita = (cita) => {
+    navigation.navigate("Inicio", {
+      screen: "ModificaCita",
+      params: { cita },
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -70,8 +108,15 @@ export default function Citas() {
             onPress={() => setShowPicker(true)}
           >
             <Text style={styles.pickerText}>
-              {date.toLocaleDateString()} 
+              {date.toLocaleDateString()}
             </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.nuevaCitaButton}
+            onPress={handleNuevaCita}
+          >
+            <Text style={styles.nuevaCitaText}>Nueva cita</Text>
           </TouchableOpacity>
         </View>
 
@@ -91,34 +136,42 @@ export default function Citas() {
         </Text>
 
         <FlatList
-          data={citas}
+          data={citasDelDia}
           keyExtractor={(item) => item.id}
+          ListEmptyComponent={
+            <Text style={styles.citaItem}>Ninguna cita en este día</Text>
+          }
           renderItem={({ item }) => (
-            <View style={styles.citaItem}>
+            <TouchableOpacity
+              style={styles.citaItem}
+              onPress={() => handleModificaCita(item)}
+            >
               <Text style={styles.citaText}>Hora: {item.hora}</Text>
               <Text style={styles.citaText}>
                 Paciente: {pacientes[item.idPaciente]?.nombre || "Desconocido"}
               </Text>
-            </View>
+            </TouchableOpacity>
           )}
         />
       </View>
 
-      <View style={styles.citasfechaCont}>
-        <Text style={styles.label}>
-          Siguientes citas
-        </Text>
+      <View style={styles.citasCont}>
+        <Text style={styles.label}>Siguientes citas:</Text>
 
         <FlatList
-          data={citas}
+          data={siguientesCitas}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <View style={styles.citaItem}>
+            <TouchableOpacity
+              style={styles.citaItem}
+              onPress={() => handleModificaCita(item)}
+            >
+              <Text style={styles.citaText}>Fecha: {item.fecha}</Text>
               <Text style={styles.citaText}>Hora: {item.hora}</Text>
               <Text style={styles.citaText}>
                 Paciente: {pacientes[item.idPaciente]?.nombre || "Desconocido"}
               </Text>
-            </View>
+            </TouchableOpacity>
           )}
         />
       </View>
@@ -133,9 +186,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   head: {
-    height: "20%",
-    minWidth: "80%",
-    maxWidth: "80%",
+    height: "15%",
+    width: "85%",
     justifyContent: "center",
     backgroundColor: azulCieloPrincipal,
     borderRadius: 15,
@@ -149,7 +201,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   label: {
-    fontSize: dynamicFontSizeText,
+    fontSize: dynamicFontSizeOption,
     fontWeight: "bold",
     color: "#333",
   },
@@ -157,40 +209,78 @@ const styles = StyleSheet.create({
     marginTop: "3%",
     minWidth: "100%",
     flexDirection: "row",
-    justifyContent: "center",
-    height: "70%",
+    justifyContent: "space-between",
+    height: "80%",
   },
   pickerButton: {
-    marginRight: "2%",
-    padding: "5%",
+    padding: "2%",
     borderWidth: 1,
     borderRadius: 10,
     backgroundColor: "#fff",
-    width: "60%",
-    height: "80%",
+    width: "65%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   pickerText: {
     fontSize: dynamicFontSizeOption,
+    textAlign: "center",
     color: "#333",
+  },
+  nuevaCitaButton: {
+    padding: "2%",
+    borderWidth: 1,
+    borderRadius: 10,
+    backgroundColor: verde,
+    width: "30%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  nuevaCitaText: {
+    fontSize: dynamicFontSizeMinimal,
+    textAlign: "center",
+    color: "#333",
+    fontWeight: "bold",
   },
   citasfechaCont: {
     backgroundColor: azulCieloPrincipal,
     marginTop: "5%",
     padding: "5%",
-    width: "80%",
-    height : '35%',
+    width: "85%",
+    minHeight: "15%",
+    maxHeight: "30%",
     borderRadius: 15,
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  citasCont: {
+    flex: 1,
+    backgroundColor: azulCieloPrincipal,
+    marginTop: "5%",
+    padding: "5%",
+    width: "85%",
+    maxHeight: "55%",
+    borderRadius: 15,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: "5%",
   },
   fechaText: {
     fontWeight: "bold",
     fontSize: dynamicFontSizeOption,
     color: azulMarinoPesado,
   },
+  emptyText: {
+    fontSize: dynamicFontSizeOption,
+    color: "#333",
+    textAlign: "center",
+    marginTop: 10,
+  },
   citaItem: {
-    marginTop: '5%',
+    marginTop: "5%",
     padding: 10,
     backgroundColor: "#fff",
     borderRadius: 5,
