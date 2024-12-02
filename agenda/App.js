@@ -11,6 +11,8 @@ import Citas from "./scr/views/citas";
 import Pacientes from "./scr/views/pacientes";
 import { background } from "./styleColors";
 import Auth from "./scr/auth/auth";
+import NuevaCita from "./scr/views/nuevaCita";
+import ModificaCita from "./scr/views/modificaCita";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator(); // Crear Stack Navigator
@@ -22,6 +24,16 @@ function InternalStack() {
       <Stack.Screen 
         name="Inicio" 
         component={Home} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="NuevaCita" 
+        component={NuevaCita} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="ModificaCita" 
+        component={ModificaCita} 
         options={{ headerShown: false }} 
       />
     </Stack.Navigator>

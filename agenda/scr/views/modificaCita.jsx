@@ -7,8 +7,8 @@ import {
   Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { getDatabase, ref, onValue, push } from "firebase/database";
-import { useNavigation } from "@react-navigation/native";
+import { getDatabase, ref, update, onValue, remove } from "firebase/database";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 import {
   dynamicFontSizeOption,
@@ -19,22 +19,26 @@ import {
   azulMarinoPesado,
   rojo,
   verde,
+  rojoPesado,
 } from "../../styleColors";
 
-export default function NuevaCita() {
+export default function ModificaCita() {
   const [date, setDate] = useState(null);
   const [time, setTime] = useState(null);
   const [pacienteId, setPacienteId] = useState("");
   const [pacientes, setPacientes] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [nuevoPaciente, setNuevoPaciente] = useState("");
   const navigation = useNavigation();
+  const route = useRoute();
+
+  const { cita } = route.params || {}; // Recibir la cita seleccionada
 
   useEffect(() => {
     const db = getDatabase();
     const pacientesRef = ref(db, "pacientes");
 
+    // Cargar lista de pacientes
     onValue(pacientesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -45,9 +49,16 @@ export default function NuevaCita() {
         setPacientes(pacientesArray);
       }
     });
-  }, []);
 
-  const handleAddCita = () => {
+    // Configurar los valores iniciales de la cita seleccionada
+    if (cita) {
+      setDate(cita.fecha ? new Date(cita.fecha + "T00:00") : null); // Ajustar zona horaria
+      setTime(cita.hora || null);
+      setPacienteId(cita.idPaciente || "");
+    }
+  }, [cita]);
+
+  const handleUpdateCita = () => {
     if (!date) {
       Alert.alert("Error", "Por favor selecciona una fecha.");
       return;
@@ -60,17 +71,21 @@ export default function NuevaCita() {
       Alert.alert("Error", "Por favor selecciona un paciente.");
       return;
     }
+    if (!cita || !cita.id) {
+      Alert.alert("Error", "No se encontró el identificador de la cita.");
+      return;
+    }
 
     const db = getDatabase();
-    const citasRef = ref(db, "citas");
+    const citaRef = ref(db, `citas/${cita.id}`); // Asegúrate de usar el ID correcto
 
-    push(citasRef, {
-      fecha: date,
-      hora: time,
+    update(citaRef, {
+      fecha: date.toISOString().split("T")[0], // Formato YYYY-MM-DD
+      hora: time, // Hora en formato HH:mm
       idPaciente: pacienteId,
     })
       .then(() => {
-        Alert.alert("Cita añadida", "La cita fue registrada exitosamente.");
+        Alert.alert("Cita actualizada", "La cita fue modificada exitosamente.");
         navigation.navigate("Inicio");
       })
       .catch((error) => {
@@ -78,35 +93,49 @@ export default function NuevaCita() {
       });
   };
 
-  const handleAddPaciente = () => {
-    if (!nuevoPaciente.trim()) {
-      Alert.alert("Error", "Por favor ingresa el nombre del paciente.");
+  const handleDeleteCita = () => {
+    if (!cita || !cita.id) {
+      Alert.alert("Error", "No se encontró el identificador de la cita.");
       return;
     }
 
-    const db = getDatabase();
-    const pacientesRef = ref(db, "pacientes");
+    Alert.alert(
+      "Confirmar eliminación",
+      "¿Estás seguro de que deseas eliminar esta cita?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () => {
+            const db = getDatabase();
+            const citaRef = ref(db, `citas/${cita.id}`);
 
-    push(pacientesRef, {
-      nombre: nuevoPaciente,
-    })
-      .then(() => {
-        Alert.alert("Paciente añadido", "El paciente fue registrado exitosamente.");
-        setNuevoPaciente("");
-      })
-      .catch((error) => {
-        Alert.alert("Error", error.message);
-      });
+            remove(citaRef)
+              .then(() => {
+                Alert.alert("Cita eliminada", "La cita fue eliminada exitosamente.");
+                navigation.navigate("Inicio");
+              })
+              .catch((error) => {
+                Alert.alert("Error", error.message);
+              });
+          },
+        },
+      ]
+    );
   };
 
   const handleCancel = () => {
-    navigation.navigate("Inicio");
+    navigation.goBack();
   };
 
   const onChangeDate = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      setDate(selectedDate.toLocaleDateString("en-CA"));
+      setDate(selectedDate);
     }
   };
 
@@ -121,26 +150,34 @@ export default function NuevaCita() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Añadir Nueva Cita</Text>
+      <Text style={styles.title}>Modificar Cita</Text>
 
-      <TouchableOpacity style={styles.picker} onPress={() => setShowDatePicker(true)}>
-        <Text style={styles.pickerText}>{date || "Seleccionar fecha"}</Text>
+      <TouchableOpacity
+        style={styles.picker}
+        onPress={() => setShowDatePicker(true)}
+      >
+        <Text style={styles.pickerText}>
+          {date ? date.toLocaleDateString("en-CA") : "Seleccionar fecha"}
+        </Text>
       </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker
-          value={new Date()}
+          value={date || new Date()}
           mode="date"
           display="default"
           onChange={onChangeDate}
         />
       )}
 
-      <TouchableOpacity style={styles.picker} onPress={() => setShowTimePicker(true)}>
+      <TouchableOpacity
+        style={styles.picker}
+        onPress={() => setShowTimePicker(true)}
+      >
         <Text style={styles.pickerText}>{time || "Seleccionar hora"}</Text>
       </TouchableOpacity>
       {showTimePicker && (
         <DateTimePicker
-          value={new Date()}
+          value={time ? new Date(`1970-01-01T${time}:00`) : new Date()}
           mode="time"
           display="default"
           onChange={onChangeTime}
@@ -157,22 +194,31 @@ export default function NuevaCita() {
           >
             <Picker.Item label="Seleccionar paciente" value="" />
             {pacientes.map((paciente) => (
-              <Picker.Item key={paciente.id} label={paciente.nombre} value={paciente.id} />
+              <Picker.Item
+                key={paciente.id}
+                label={paciente.nombre}
+                value={paciente.id}
+              />
             ))}
           </Picker>
         </View>
-        <TouchableOpacity style={styles.addPacienteButton} onPress={handleAddPaciente}>
-          <Text style={styles.buttonText}>+</Text>
-        </TouchableOpacity>
       </View>
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
           <Text style={styles.buttonText}>Cancelar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddCita}>
-          <Text style={styles.buttonText}>Añadir cita</Text>
+        <TouchableOpacity style={styles.addButton} onPress={handleUpdateCita}>
+          <Text style={styles.buttonText}>Actualizar cita</Text>
         </TouchableOpacity>
+      </View>
+      <View style={styles.buttonContainerDel}>
+      <TouchableOpacity
+        style={styles.ButtonDel}
+        onPress={handleDeleteCita}
+      >
+        <Text style={styles.buttonText}>Eliminar cita</Text>
+      </TouchableOpacity>
       </View>
     </View>
   );
@@ -210,16 +256,14 @@ const styles = StyleSheet.create({
     marginTop: "10%",
     maxWidth: "80%",
     height: "12%",
-    padding: 0,
   },
   pickerBox: {
     borderWidth: 1,
     borderColor: azulMarinoPesado,
     borderRadius: 15,
-    width: "70%",
+    width: "100%",
     height: "100%",
     backgroundColor: "#f9f9f9",
-    padding: 0,
   },
   pickerPaciente: {
     flex: 1,
@@ -229,21 +273,19 @@ const styles = StyleSheet.create({
     fontSize: dynamicFontSizeOption,
     color: "#333",
   },
-  addPacienteButton: {
-    marginLeft: "5%",
-    backgroundColor: azulClaroPrincipal,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    width: "25%",
-    height: "100%",
-  },
   buttonContainer: {
     marginTop: "15%",
     height: "10%",
     flexDirection: "row",
     justifyContent: "space-between",
     width: "80%",
+  },
+  buttonContainerDel: {
+    marginTop: "5%",
+    height: "10%",
+    flexDirection: "row",
+    width: "80%",
+    justifyContent: 'center'
   },
   cancelButton: {
     backgroundColor: rojo,
@@ -257,6 +299,14 @@ const styles = StyleSheet.create({
     backgroundColor: verde,
     borderRadius: 10,
     width: "45%",
+    height: "100%",
+    alignItems: "center",
+    padding: "4%",
+  },
+  ButtonDel: {
+    backgroundColor: rojoPesado,
+    borderRadius: 10,
+    width: "70%",
     height: "100%",
     alignItems: "center",
     padding: "6%",
