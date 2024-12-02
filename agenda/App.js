@@ -4,8 +4,9 @@ import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import app from "./scr/utils/firebaseConfig";
+import { initializeAuth, getReactNativePersistence, onAuthStateChanged } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import app from "./scr/utils/firebaseConfig"; // Configuración de Firebase
 import Home from "./scr/views/home";
 import Citas from "./scr/views/citas";
 import Pacientes from "./scr/views/pacientes";
@@ -17,24 +18,29 @@ import ModificaCita from "./scr/views/modificaCita";
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator(); // Crear Stack Navigator
 
+// Configurar Auth con persistencia usando AsyncStorage
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
+
 // Rutas para la navegación entre pestañas
 function InternalStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen 
-        name="Inicio" 
-        component={Home} 
-        options={{ headerShown: false }} 
+      <Stack.Screen
+        name="Inicio"
+        component={Home}
+        options={{ headerShown: false }}
       />
-      <Stack.Screen 
-        name="NuevaCita" 
-        component={NuevaCita} 
-        options={{ headerShown: false }} 
+      <Stack.Screen
+        name="NuevaCita"
+        component={NuevaCita}
+        options={{ headerShown: false }}
       />
-      <Stack.Screen 
-        name="ModificaCita" 
-        component={ModificaCita} 
-        options={{ headerShown: false }} 
+      <Stack.Screen
+        name="ModificaCita"
+        component={ModificaCita}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
@@ -44,38 +50,38 @@ function InternalStack() {
 function RootStack() {
   return (
     <Tab.Navigator initialRouteName="Inicio">
-      <Tab.Screen 
-        name="Citas" 
+      <Tab.Screen
+        name="Citas"
         component={Citas}
         options={{
           tabBarIcon: ({ size }) => (
-            <Image 
-              source={require('./assets/icons/cita.png')}
-              style={{ width: size, height: size}} 
-            />
-          ),
-        }}     
-      />
-      <Tab.Screen 
-        name="Inicio" 
-        component={InternalStack}
-        options={{
-          tabBarIcon: ({ size }) => (
-            <Image 
-              source={require('./assets/icons/calendario.png')}
-              style={{ width: size, height: size}} 
+            <Image
+              source={require("./assets/icons/cita.png")}
+              style={{ width: size, height: size }}
             />
           ),
         }}
       />
-      <Tab.Screen 
-        name="Pacientes" 
-        component={Pacientes} 
+      <Tab.Screen
+        name="Inicio"
+        component={InternalStack}
         options={{
           tabBarIcon: ({ size }) => (
-            <Image 
-              source={require('./assets/icons/pas.png')}
-              style={{ width: size, height: size}} 
+            <Image
+              source={require("./assets/icons/calendario.png")}
+              style={{ width: size, height: size }}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Pacientes"
+        component={Pacientes}
+        options={{
+          tabBarIcon: ({ size }) => (
+            <Image
+              source={require("./assets/icons/pas.png")}
+              style={{ width: size, height: size }}
             />
           ),
         }}
@@ -89,7 +95,6 @@ export default function App() {
   const [loading, setLoading] = useState(true); // Estado de carga
 
   useEffect(() => {
-    const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
