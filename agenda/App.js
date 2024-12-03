@@ -14,6 +14,8 @@ import Citas from "./scr/views/citas";
 import Pacientes from "./scr/views/pacientes";
 import NuevaCita from "./scr/views/nuevaCita";
 import ModificaCita from "./scr/views/modificaCita";
+import AgregarPaciente from "./scr/views/nuevoPaciente";
+import ModificaPaciente from "./scr/views/modificaPaciente";
 import Sidebar from "./Sidebar";
 import Auth from "./scr/auth/auth";
 import { background } from "./styleColors";
@@ -37,12 +39,22 @@ function InternalStack() {
       />
       <Stack.Screen 
         name="NuevoPaciente" 
-        component={NuevoPaciente} 
+        component={AgregarPaciente} 
         options={{ headerShown: false }} 
       />
       <Stack.Screen 
         name="ModificaPaciente" 
         component={ModificaPaciente} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="NuevaCita" 
+        component={NuevaCita} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="ModificaCita" 
+        component={ModificaCita} 
         options={{ headerShown: false }} 
       />
     </Stack.Navigator>

@@ -12,6 +12,7 @@ import {
   amarilloLigero,
   verdePesado,
   azulMarinoPesado,
+  dynamicFontSizeMinimal
 } from "../../styleColors";
 import { useNavigation } from "@react-navigation/native";
 

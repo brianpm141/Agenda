@@ -83,7 +83,7 @@ export default function NuevaCita() {
   };
 
   const handleAddPaciente = () => {
-
+    navigation.navigate('Inicio', { screen: 'NuevoPaciente' });
   };
 
   const handleCancel = () => {
