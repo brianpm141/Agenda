@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { getDatabase, ref, push } from 'firebase/database';
 import app from '../utils/firebase';
 
-const AgregarPaciente = () => {
+const AgregarPaciente = ({ navigation }) => {
   const [nombre, setNombre] = useState('');
   const [diagnostico, setDiagnostico] = useState('');
   const [edad, setEdad] = useState('');
@@ -74,15 +74,72 @@ const AgregarPaciente = () => {
         value={resumenTratamiento}
         onChangeText={setResumenTratamiento}
       />
-      <Button title="Agregar Paciente" onPress={handleAgregarPaciente} />
+      
+      {/* Botón de agregar paciente con estilo verde */}
+      <TouchableOpacity style={styles.addButton} onPress={handleAgregarPaciente}>
+        <Text style={styles.buttonText}>Agregar Paciente</Text>
+      </TouchableOpacity>
+
+      {/* Botón para regresar con estilo azul */}
+      <View style={styles.backButtonContainer}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Pacientes')}>
+          <Text style={styles.buttonText}>Regresar a Pacientes</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#f9f9f9' },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#2a2a2a', marginBottom: 20, textAlign: 'center' },
-  input: { height: 40, borderColor: '#ccc', borderWidth: 1, marginBottom: 15, paddingLeft: 10, borderRadius: 5 },
+  container: {
+    flex: 1,
+    padding: 15,
+    backgroundColor: '#f9f9f9',
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#333',
+  },
+  input: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 15,
+    paddingLeft: 10,
+    borderRadius: 5,
+  },
+  addButton: {
+    backgroundColor: '#4CAF50',  // Verde
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,  // Bordes redondeados
+    marginBottom: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  backButton: {
+    backgroundColor: '#2196F3',  // Azul
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,  // Bordes redondeados
+    marginBottom: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  backButtonContainer: {
+    marginTop: 20,
+    width: '100%',
+    alignItems: 'center',
+  },
 });
 
 export default AgregarPaciente;
