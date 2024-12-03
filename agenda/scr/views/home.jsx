@@ -3,11 +3,15 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import React, { useState, useEffect } from "react";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { Agenda } from 'react-native-calendars';
 import {
+  amarilloLigero,
+  amarilloPesado,
+  amarilloPrincipal,
   azulCieloPrincipal,
   azulMarinoPesado,
   background,
@@ -15,10 +19,10 @@ import {
   dynamicFontSizeOption,
   dynamicFontSizeText,
   verde,
+  verdePesado,
 } from "../../styleColors";
 
 export default function Home() {
-  const [citas, setCitas] = useState({});
   const [pacientes, setPacientes] = useState({});
   const [items, setItems] = useState({});
   const db = getDatabase();
@@ -37,7 +41,17 @@ export default function Home() {
     onValue(citasRef, (snapshot) => {
       const data = snapshot.val();
       const formattedItems = {};
-
+      const today = new Date();
+      const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const endDate = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+      for (
+        let d = new Date(startDate);
+        d <= endDate;
+        d.setDate(d.getDate() + 1)
+      ) {
+        const date = d.toISOString().split('T')[0];
+        formattedItems[date] = []; 
+      }
       // Transformar datos en el formato necesario para Agenda
       for (const key in data) {
         const { fecha, hora, idPaciente } = data[key];
@@ -54,25 +68,29 @@ export default function Home() {
       setItems(formattedItems);
     });
   }, [pacientes]);
+  const renderEmptyDate = () => {
+    return (
+      <View style={styles.emptyDate}>
+        <Text>Agrega una cita!</Text>
+      </View>
+    );
+  };
     return (
           <Agenda
             items={items}
             renderItem={(item, firstItemInDay) => (
               <TouchableOpacity style={styles.item}>
-                <Text style={styles.itemText}>{item.name}</Text>
-                <Text style={styles.itemText}>{item.time}</Text>
+                <Text style={styles.itemTextHora}>{item.time}</Text>
+                <Text style={styles.itemTextPaciente}>{item.name}</Text>
               </TouchableOpacity>
             )}
+            renderEmptyDate={renderEmptyDate}
             showClosingKnob={true}
           />
       );
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 0.95,
-      justifyContent: 'center',
-    },
     item: {
       backgroundColor: azulCieloPrincipal,
       flex: 1,
@@ -82,8 +100,18 @@ const styles = StyleSheet.create({
       marginTop: 25,
       paddingBottom:20
     },
-    itemText: {
-      color: 'black',
+    itemTextHora: {
+      color: verdePesado,
       fontSize: 16,
-    }
+    },
+    itemTextPaciente: {
+      color: amarilloPesado,
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+  emptyDate: {
+    height: 15,
+    flex: 1,
+    paddingTop: 30
+  },
   });
