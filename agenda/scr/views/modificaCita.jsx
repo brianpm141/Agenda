@@ -33,7 +33,8 @@ export default function ModificaCita() {
   const route = useRoute();
 
   const { cita } = route.params || {}; // Recibir la cita seleccionada
-
+  console.log(cita);
+  
   useEffect(() => {
     const db = getDatabase();
     const pacientesRef = ref(db, "pacientes");

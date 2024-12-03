@@ -9,9 +9,9 @@ import React, { useState, useEffect } from "react";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { Agenda } from "react-native-calendars";
 import {
-  amarilloPesado,
-  azulCieloPrincipal,
-
+  amarilloLigero,
+  azulMarinoPesado,
+  dynamicFontSizeMinimal,
   verdePesado,
 } from "../../styleColors";
 import { useNavigation } from "@react-navigation/native";
@@ -57,7 +57,7 @@ export default function Home() {
           name: `Paciente: ${pacientes[idPaciente]?.nombre || "Desconocido"}`,
           time: hora,
           height: 50,
-          cita:data[key],
+          cita:{...data[key],id:key},
         });
       }
 
@@ -91,7 +91,7 @@ export default function Home() {
           <TouchableOpacity style={styles.item} onPress={_=>{
             navigation.navigate("Inicio", {
               screen: "ModificaCita",
-              params:  item ,
+              params:  item,
             });}}>
             <Text style={styles.itemTextHora}>{item.time}</Text>
             <Text style={styles.itemTextPaciente}>{item.name}</Text>
