@@ -141,7 +141,10 @@ export default function Citas() {
           ListEmptyComponent={
             <Text style={styles.citaItem}>Ninguna cita en este día</Text>
           }
-          renderItem={({ item }) => (
+          renderItem={({ item }) => {
+            console.log(item);
+            
+            return(
             <TouchableOpacity
               style={styles.citaItem}
               onPress={() => handleModificaCita(item)}
@@ -151,7 +154,7 @@ export default function Citas() {
                 Paciente: {pacientes[item.idPaciente]?.nombre || "Desconocido"}
               </Text>
             </TouchableOpacity>
-          )}
+          )}}
         />
       </View>
 
