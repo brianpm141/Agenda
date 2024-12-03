@@ -28,7 +28,7 @@ const auth = initializeAuth(app, {
 function InternalStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Inicio" component={Home} options={{ headerShown: false }} />
+      <Stack.Screen name="InicioStack" component={Home} options={{ headerShown: false }} />
       <Stack.Screen name="NuevaCita" component={NuevaCita} options={{ headerShown: false }} />
       <Stack.Screen name="ModificaCita" component={ModificaCita} options={{ headerShown: false }} />
     </Stack.Navigator>
@@ -48,7 +48,7 @@ function RootStack() {
               style={{ width: size, height: size }}
             />
           ),
-          headerShown : false
+          headerShown :false,
         }}
       />
       <Tab.Screen
@@ -61,7 +61,7 @@ function RootStack() {
               style={{ width: size, height: size }}
             />
           ),
-          headerShown : false
+          headerShown :false
         }}
       />
       <Tab.Screen
@@ -74,7 +74,7 @@ function RootStack() {
               style={{ width: size, height: size }}
             />
           ),
-          headerShown : false
+          headerShown :false
         }}
       />
     </Tab.Navigator>
@@ -113,9 +113,13 @@ export default function App() {
     <NavigationContainer>
       <Drawer.Navigator
         drawerContent={(props) => <Sidebar {...props} />}
-        screenOptions={{ drawerPosition: "right" }}
+        screenOptions={{ drawerPosition: "left" }}
       >
-        <Drawer.Screen name="Principal" component={RootStack} />
+        <Drawer.Screen
+    name="Principal"
+    component={RootStack}
+    options={{ headerTitle: "AgendaFisio" }}
+  />
       </Drawer.Navigator>
     </NavigationContainer>
   );
