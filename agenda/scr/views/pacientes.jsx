@@ -7,11 +7,14 @@ export default function Pacientes() {
   const navigation = useNavigation();
 
   const navigateToNuevoPaciente = () => {
-    navigation.navigate('NuevoPaciente');
+    navigation.navigate("Inicio", {
+      screen: "NuevoPaciente",
+    });
   };
 
   const navigateToModificaPaciente = () => {
-    navigation.navigate('ModificaPaciente');
+    navigation.navigate("Inicio", {
+      screen: "ModificaPaciente"});
   };
 
   return (
