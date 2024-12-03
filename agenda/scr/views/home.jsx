@@ -66,7 +66,7 @@ export default function Home() {
 
   const handleNuevaCita = (day) => {
     navigation.navigate("NuevaCita", {
-      selectedDay: day.dateString,
+      selectedDay: new Date(day.getFullYear(), day.getMonth(), day.getDate()),
     });
   };
 

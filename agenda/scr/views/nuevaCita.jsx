@@ -37,7 +37,7 @@ export default function NuevaCita() {
   useEffect(() => {
     const db = getDatabase();
     const pacientesRef = ref(db, "pacientes");
-    setDate(selectedDay);
+    setDate(selectedDay ? selectedDay.toLocaleDateString("en-CA") : "");
 
     onValue(pacientesRef, (snapshot) => {
       const data = snapshot.val();
