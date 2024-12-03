@@ -9,16 +9,9 @@ import React, { useState, useEffect } from "react";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { Agenda } from 'react-native-calendars';
 import {
-  amarilloLigero,
   amarilloPesado,
-  amarilloPrincipal,
   azulCieloPrincipal,
-  azulMarinoPesado,
-  background,
-  dynamicFontSizeMinimal,
-  dynamicFontSizeOption,
-  dynamicFontSizeText,
-  verde,
+
   verdePesado,
 } from "../../styleColors";
 

@@ -86,7 +86,7 @@ export default function ModificaCita() {
     })
       .then(() => {
         Alert.alert("Cita actualizada", "La cita fue modificada exitosamente.");
-        navigation.navigate("Inicio");
+        navigation.goBack();
       })
       .catch((error) => {
         Alert.alert("Error", error.message);
@@ -117,7 +117,7 @@ export default function ModificaCita() {
             remove(citaRef)
               .then(() => {
                 Alert.alert("Cita eliminada", "La cita fue eliminada exitosamente.");
-                navigation.navigate("Inicio");
+                navigation.goBack();
               })
               .catch((error) => {
                 Alert.alert("Error", error.message);

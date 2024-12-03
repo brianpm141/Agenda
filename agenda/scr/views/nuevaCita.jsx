@@ -28,7 +28,6 @@ export default function NuevaCita() {
   const [pacientes, setPacientes] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [nuevoPaciente, setNuevoPaciente] = useState("");
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -71,7 +70,7 @@ export default function NuevaCita() {
     })
       .then(() => {
         Alert.alert("Cita añadida", "La cita fue registrada exitosamente.");
-        navigation.navigate("Inicio");
+        navigation.goBack();
       })
       .catch((error) => {
         Alert.alert("Error", error.message);
@@ -79,28 +78,11 @@ export default function NuevaCita() {
   };
 
   const handleAddPaciente = () => {
-    if (!nuevoPaciente.trim()) {
-      Alert.alert("Error", "Por favor ingresa el nombre del paciente.");
-      return;
-    }
 
-    const db = getDatabase();
-    const pacientesRef = ref(db, "pacientes");
-
-    push(pacientesRef, {
-      nombre: nuevoPaciente,
-    })
-      .then(() => {
-        Alert.alert("Paciente añadido", "El paciente fue registrado exitosamente.");
-        setNuevoPaciente("");
-      })
-      .catch((error) => {
-        Alert.alert("Error", error.message);
-      });
   };
 
   const handleCancel = () => {
-    navigation.navigate("Inicio");
+    navigation.goBack();
   };
 
   const onChangeDate = (event, selectedDate) => {
