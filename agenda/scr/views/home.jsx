@@ -10,11 +10,9 @@ import { getDatabase, ref, onValue } from "firebase/database";
 import { Agenda } from "react-native-calendars";
 import {
   amarilloLigero,
-  azulMarinoPesado,
   dynamicFontSizeMinimal,
   verdePesado,
   azulMarinoPesado,
-  dynamicFontSizeMinimal
 } from "../../styleColors";
 import { useNavigation } from "@react-navigation/native";
 
