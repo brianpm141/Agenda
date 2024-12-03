@@ -83,7 +83,7 @@ export default function NuevaCita() {
   };
 
   const handleAddPaciente = () => {
-    navigation.navigate('Inicio', { screen: 'NuevoPaciente' });
+    navigation.navigate('NuevoPaciente');
   };
 
   const handleCancel = () => {
@@ -109,9 +109,8 @@ export default function NuevaCita() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Añadir Nueva Cita</Text>
-
       <TouchableOpacity style={styles.picker} onPress={() => setShowDatePicker(true)}>
-        <Text style={styles.pickerText}>{ date || "Seleccionar fechaaaaa"}</Text>
+        <Text style={styles.pickerText}>{ date || "Seleccionar fecha"}</Text>
       </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker

@@ -1,5 +1,4 @@
 import {
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,7 +11,7 @@ import {
   amarilloLigero,
   verdePesado,
   azulMarinoPesado,
-  dynamicFontSizeMinimal
+  dynamicFontSizeMinimal,
 } from "../../styleColors";
 import { useNavigation } from "@react-navigation/native";
 
@@ -57,19 +56,20 @@ export default function Home() {
           name: `Paciente: ${pacientes[idPaciente]?.nombre || "Desconocido"}`,
           time: hora,
           height: 50,
-          cita:{...data[key],id:key},
+          cita: { ...data[key], id: key },
         });
       }
 
       setItems(formattedItems);
     });
   }, [pacientes]);
+
   const handleNuevaCita = (day) => {
-    navigation.navigate("Inicio", {
-      screen: "NuevaCita",
-      params: { selectedDay: day.toLocaleDateString("en-es") },
+    navigation.navigate("NuevaCita", {
+      selectedDay: day.dateString,
     });
   };
+
   const renderEmptyDate = (day) => {
     return (
       <View style={styles.emptyDate}>
@@ -83,21 +83,23 @@ export default function Home() {
     );
   };
 
+  const handleModificarCita = (item) => {
+    navigation.navigate("ModificaCita", { cita: item.cita });
+  };
+
   return (
     <Agenda
-    items={items}
-    selected={new Date().toLocaleDateString().split('/').reverse().join('-')}//Obtiene la fecha de hoy
-    renderItem={(item) => (
-          <TouchableOpacity style={styles.item} onPress={_=>{
-            navigation.navigate("Inicio", {
-              screen: "ModificaCita",
-              params:  item,
-            });}}>
-            <Text style={styles.itemTextHora}>{item.time}</Text>
-            <Text style={styles.itemTextPaciente}>{item.name}</Text>
-          </TouchableOpacity>
-        )
-      }
+      items={items}
+      selected={new Date().toISOString().split("T")[0]} // Fecha de hoy en formato YYYY-MM-DD
+      renderItem={(item) => (
+        <TouchableOpacity
+          style={styles.item}
+          onPress={() => handleModificarCita(item)}
+        >
+          <Text style={styles.itemTextHora}>{item.time}</Text>
+          <Text style={styles.itemTextPaciente}>{item.name}</Text>
+        </TouchableOpacity>
+      )}
       renderEmptyDate={(day) => renderEmptyDate(day)}
       showClosingKnob={true}
     />
