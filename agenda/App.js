@@ -6,8 +6,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Home from './scr/views/home';
 import Citas from './scr/views/citas';
 import Pacientes from './scr/views/pacientes';
-import NuevoPaciente from './scr/views/nuevoPaciente';
-import ModificaPaciente from './scr/views/modificaPaciente';
+import NuevoPaciente from './scr/views/nuevoPaciente'; // Asegúrate de que la ruta sea correcta
+import ModificaPaciente from './scr/views/modificaPaciente'; // Asegúrate de que la ruta sea correcta
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator(); // Crear Stack Navigator
