@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { getDatabase, ref, onValue, push } from "firebase/database";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 import {
   dynamicFontSizeOption,
@@ -22,6 +22,7 @@ import {
 } from "../../styleColors";
 
 export default function NuevaCita() {
+  
   const [date, setDate] = useState(null);
   const [time, setTime] = useState(null);
   const [pacienteId, setPacienteId] = useState("");
@@ -30,10 +31,14 @@ export default function NuevaCita() {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [nuevoPaciente, setNuevoPaciente] = useState("");
   const navigation = useNavigation();
+  
+  const route = useRoute();
+  const { selectedDay } = route.params || {};
 
   useEffect(() => {
     const db = getDatabase();
     const pacientesRef = ref(db, "pacientes");
+    setDate(selectedDay);
 
     onValue(pacientesRef, (snapshot) => {
       const data = snapshot.val();
@@ -124,7 +129,7 @@ export default function NuevaCita() {
       <Text style={styles.title}>Añadir Nueva Cita</Text>
 
       <TouchableOpacity style={styles.picker} onPress={() => setShowDatePicker(true)}>
-        <Text style={styles.pickerText}>{date || "Seleccionar fecha"}</Text>
+        <Text style={styles.pickerText}>{ date || "Seleccionar fechaaaaa"}</Text>
       </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker
