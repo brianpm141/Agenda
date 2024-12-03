@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { getDatabase, ref, onValue, push } from "firebase/database";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -22,7 +16,6 @@ import {
 } from "../../styleColors";
 
 export default function NuevaCita() {
-  
   const [date, setDate] = useState(null);
   const [time, setTime] = useState(null);
   const [pacienteId, setPacienteId] = useState("");
@@ -30,7 +23,7 @@ export default function NuevaCita() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const navigation = useNavigation();
-  
+
   const route = useRoute();
   const { selectedDay } = route.params || {};
 
@@ -83,7 +76,7 @@ export default function NuevaCita() {
   };
 
   const handleAddPaciente = () => {
-    navigation.navigate('NuevoPaciente');
+    navigation.navigate("NuevoPaciente");
   };
 
   const handleCancel = () => {
@@ -102,15 +95,22 @@ export default function NuevaCita() {
     if (selectedTime) {
       const hours = selectedTime.getHours();
       const minutes = selectedTime.getMinutes();
-      setTime(`${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`);
+      setTime(
+        `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}`
+      );
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Añadir Nueva Cita</Text>
-      <TouchableOpacity style={styles.picker} onPress={() => setShowDatePicker(true)}>
-        <Text style={styles.pickerText}>{ date || "Seleccionar fecha"}</Text>
+      <TouchableOpacity
+        style={styles.picker}
+        onPress={() => setShowDatePicker(true)}
+      >
+        <Text style={styles.pickerText}>{date || "Seleccionar fecha"}</Text>
       </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker
@@ -121,7 +121,10 @@ export default function NuevaCita() {
         />
       )}
 
-      <TouchableOpacity style={styles.picker} onPress={() => setShowTimePicker(true)}>
+      <TouchableOpacity
+        style={styles.picker}
+        onPress={() => setShowTimePicker(true)}
+      >
         <Text style={styles.pickerText}>{time || "Seleccionar hora"}</Text>
       </TouchableOpacity>
       {showTimePicker && (
@@ -143,11 +146,18 @@ export default function NuevaCita() {
           >
             <Picker.Item label="Seleccionar paciente" value="" />
             {pacientes.map((paciente) => (
-              <Picker.Item key={paciente.id} label={paciente.nombre} value={paciente.id} />
+              <Picker.Item
+                key={paciente.id}
+                label={paciente.nombre}
+                value={paciente.id}
+              />
             ))}
           </Picker>
         </View>
-        <TouchableOpacity style={styles.addPacienteButton} onPress={handleAddPaciente}>
+        <TouchableOpacity
+          style={styles.addPacienteButton}
+          onPress={handleAddPaciente}
+        >
           <Text style={styles.buttonText}>+</Text>
         </TouchableOpacity>
       </View>

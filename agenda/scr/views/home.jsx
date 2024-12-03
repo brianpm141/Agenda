@@ -1,9 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { Agenda } from "react-native-calendars";
@@ -36,8 +31,8 @@ export default function Home() {
       const data = snapshot.val();
       const formattedItems = {};
       const today = new Date();
-      const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      const endDate = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+      const startDate = new Date(today.getFullYear(), today.getDay() - 15, 1);
+      const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
       for (
         let d = new Date(startDate);
         d <= endDate;
@@ -66,7 +61,7 @@ export default function Home() {
 
   const handleNuevaCita = (day) => {
     navigation.navigate("NuevaCita", {
-      selectedDay: day.dateString,
+      selectedDay: day.toLocaleDateString("en-CA"),
     });
   };
 
@@ -101,7 +96,6 @@ export default function Home() {
         </TouchableOpacity>
       )}
       renderEmptyDate={(day) => renderEmptyDate(day)}
-      showClosingKnob={true}
     />
   );
 }
