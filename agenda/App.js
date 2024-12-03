@@ -1,16 +1,30 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
-import Home from './scr/views/home';
-import Citas from './scr/views/citas';
-import Pacientes from './scr/views/pacientes';
-import NuevoPaciente from './scr/views/nuevoPaciente'; // Asegúrate de que la ruta sea correcta
-import ModificaPaciente from './scr/views/modificaPaciente'; // Asegúrate de que la ruta sea correcta
+
+import React, { useState, useEffect } from "react";
+import { Image, SafeAreaView, ActivityIndicator } from "react-native";
+import { StyleSheet } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
+import { createDrawerNavigator } from "@react-navigation/drawer"; // Importar Drawer Navigator
+import { initializeAuth, getReactNativePersistence, onAuthStateChanged } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import app from "./scr/utils/firebaseConfig";
+import Home from "./scr/views/home";
+import Citas from "./scr/views/citas";
+import Pacientes from "./scr/views/pacientes";
+import NuevaCita from "./scr/views/nuevaCita";
+import ModificaCita from "./scr/views/modificaCita";
+import Sidebar from "./Sidebar";
+import Auth from "./scr/auth/auth";
+import { background } from "./styleColors";
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator(); // Crear Stack Navigator
+const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator(); // Crear Drawer Navigator
+
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
 
 // Rutas para la navegación entre pestañas
 function InternalStack() {
@@ -35,39 +49,104 @@ function InternalStack() {
   );
 }
 
-// Rutas de la barra de navegación
 function RootStack() {
   return (
     <Tab.Navigator initialRouteName="Inicio">
-      <Tab.Screen 
-        name="Citas" 
-        component={Citas}   
+      <Tab.Screen
+        name="Citas"
+        component={Citas}
+        options={{
+          tabBarIcon: ({ size }) => (
+            <Image
+              source={require("./assets/icons/cita.png")}
+              style={{ width: size, height: size }}
+            />
+          ),
+          headerShown :false,
+        }}
       />
-      <Tab.Screen 
-        name="Inicio" 
-        component={InternalStack} // Navegación a través de un Stack
+      <Tab.Screen
+        name="Inicio"
+        component={InternalStack}
+        options={{
+          tabBarIcon: ({ size }) => (
+            <Image
+              source={require("./assets/icons/calendario.png")}
+              style={{ width: size, height: size }}
+            />
+          ),
+          headerShown :false
+        }}
       />
-      <Tab.Screen 
-        name="Pacientes" 
-        component={Pacientes} 
+      <Tab.Screen
+        name="Pacientes"
+        component={Pacientes}
+        options={{
+          tabBarIcon: ({ size }) => (
+            <Image
+              source={require("./assets/icons/pas.png")}
+              style={{ width: size, height: size }}
+            />
+          ),
+          headerShown :false
+        }}
       />
     </Tab.Navigator>
   );
 }
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user ? user : null);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.background, styles.center]}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </SafeAreaView>
+    );
+  }
+
+  if (!user) {
+    return (
+      <SafeAreaView style={styles.background}>
+        <Auth />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <NavigationContainer>
-      <RootStack />
+      <Drawer.Navigator
+        drawerContent={(props) => <Sidebar {...props} />}
+        screenOptions={{ drawerPosition: "left" }}
+      >
+        <Drawer.Screen
+    name="Principal"
+    component={RootStack}
+    options={{ headerTitle: "AgendaFisio" }}
+  />
+      </Drawer.Navigator>
     </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
+    backgroundColor: background,
+    paddingVertical: "5%",
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+  },
+  center: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
