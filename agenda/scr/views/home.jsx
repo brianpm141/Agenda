@@ -9,10 +9,10 @@ import React, { useState, useEffect } from "react";
 import { getDatabase, ref, onValue } from "firebase/database";
 import { Agenda } from "react-native-calendars";
 import {
-  amarilloPesado,
-  azulCieloPrincipal,
-
+  amarilloLigero,
   verdePesado,
+  azulMarinoPesado,
+  dynamicFontSizeMinimal
 } from "../../styleColors";
 import { useNavigation } from "@react-navigation/native";
 
