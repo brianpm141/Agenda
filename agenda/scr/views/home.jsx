@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   itemTextatendido: {
-    maxWidth: "25%",
+    maxWidth: "50%",
     borderRadius: 5,
     fontSize: 15,
     fontWeight: "bold",

@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { getDatabase, ref, onValue } from "firebase/database";
 import {
@@ -107,9 +113,7 @@ export default function Citas() {
             style={styles.pickerButton}
             onPress={() => setShowPicker(true)}
           >
-            <Text style={styles.pickerText}>
-              {date.toLocaleDateString()}
-            </Text>
+            <Text style={styles.pickerText}>{date.toLocaleDateString()}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -132,7 +136,8 @@ export default function Citas() {
 
       <View style={styles.citasfechaCont}>
         <Text style={styles.label}>
-          Citas del día: <Text style={styles.fechaText}>{date.toLocaleDateString()}</Text>
+          Citas del día:{" "}
+          <Text style={styles.fechaText}>{date.toLocaleDateString()}</Text>
         </Text>
 
         <FlatList
@@ -143,18 +148,20 @@ export default function Citas() {
           }
           renderItem={({ item }) => {
             console.log(item);
-            
-            return(
-            <TouchableOpacity
-              style={styles.citaItem}
-              onPress={() => handleModificaCita(item)}
-            >
-              <Text style={styles.citaText}>Hora: {item.hora}</Text>
-              <Text style={styles.citaText}>
-                Paciente: {pacientes[item.idPaciente]?.nombre || "Desconocido"}
-              </Text>
-            </TouchableOpacity>
-          )}}
+
+            return (
+              <TouchableOpacity
+                style={styles.citaItem}
+                onPress={() => handleModificaCita(item)}
+              >
+                <Text style={styles.citaText}>Hora: {item.hora}</Text>
+                <Text style={styles.citaText}>
+                  Paciente:{" "}
+                  {pacientes[item.idPaciente]?.nombre || "Desconocido"}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
         />
       </View>
 

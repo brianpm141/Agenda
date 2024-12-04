@@ -162,7 +162,6 @@ export default function NuevaCita() {
             style={styles.pickerPaciente}
             itemStyle={styles.pickerItem}
           >
-            {/* Muestra "Seleccionar paciente" solo si no se ha seleccionado otro */}
             {defaultVisible && (
               <Picker.Item label="Seleccionar paciente" value="" />
             )}
@@ -175,6 +174,12 @@ export default function NuevaCita() {
             ))}
           </Picker>
         </View>
+        <TouchableOpacity
+          style={styles.addPacienteButton}
+          onPress={handleAddPaciente}
+        >
+          <Text style={styles.buttonText}>+</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.SlideRow}>
@@ -246,7 +251,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: azulMarinoPesado,
     borderRadius: 15,
-    width: "100%",
+    width: "70%",
     height: "100%",
     backgroundColor: "#f9f9f9",
   },
@@ -313,5 +318,14 @@ const styles = StyleSheet.create({
     fontSize: dynamicFontSizeTitle,
     color: "#333",
     marginLeft: 10,
+  },
+  addPacienteButton: {
+    marginLeft: "5%",
+    backgroundColor: azulClaroPrincipal,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "25%",
+    height: "100%",
   },
 });
