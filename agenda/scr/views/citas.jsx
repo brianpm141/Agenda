@@ -35,7 +35,6 @@ export default function Citas() {
 
   useEffect(() => {
     const db = getDatabase();
-
     const pacientesRef = ref(db, "pacientes");
     onValue(pacientesRef, (snapshot) => {
       const data = snapshot.val();
@@ -167,7 +166,6 @@ export default function Citas() {
 
       <View style={styles.citasCont}>
         <Text style={styles.label}>Siguientes citas:</Text>
-
         <FlatList
           data={siguientesCitas}
           keyExtractor={(item) => item.id}
@@ -176,7 +174,6 @@ export default function Citas() {
               style={styles.citaItem}
               onPress={() => handleModificaCita(item)}
             >
-              <Text style={styles.citaText}>Fecha: {item.fecha}</Text>
               <Text style={styles.citaText}>Hora: {item.hora}</Text>
               <Text style={styles.citaText}>
                 Paciente: {pacientes[item.idPaciente]?.nombre || "Desconocido"}

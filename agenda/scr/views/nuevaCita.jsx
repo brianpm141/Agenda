@@ -8,7 +8,7 @@ import {
   Switch,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { getDatabase, ref, onValue, push } from "firebase/database";
+import { getDatabase, ref, get, push } from "firebase/database";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Picker } from "@react-native-picker/picker";
 import {
@@ -42,7 +42,7 @@ export default function NuevaCita() {
     const pacientesRef = ref(db, "pacientes");
     setDate(selectedDay ? selectedDay : "");
 
-    onValue(pacientesRef, (snapshot) => {
+    get(pacientesRef).then((snapshot) => {
       const data = snapshot.val();
       if (data) {
         const pacientesArray = Object.entries(data).map(([key, value]) => ({
@@ -54,7 +54,7 @@ export default function NuevaCita() {
     });
   }, []);
 
-  const handleAddCita = () => {
+  const handleAddCita = async () => {
     if (!date) {
       Alert.alert("Error", "Por favor selecciona una fecha.");
       return;
@@ -71,20 +71,38 @@ export default function NuevaCita() {
     const db = getDatabase();
     const citasRef = ref(db, "citas");
 
-    push(citasRef, {
-      fecha: date,
-      hora: time,
-      idPaciente: pacienteId,
-      atendido: atendido,
-    })
-      .then(() => {
+    try {
+      const snapshot = await get(citasRef);
+      const data = snapshot.val();
+
+      const citasArray = data
+        ? Object.values(data).filter(
+            (cita) => cita.fecha === date && cita.hora === time
+          )
+        : [];
+
+      if (citasArray.length > 0) {
+        Alert.alert(
+          "Conflicto de horario",
+          "Ya existe una cita programada a esta hora. Elige otra hora."
+        );
+        return;
+      } else {
+        // Si no hay conflicto, añadir la cita
+        await push(citasRef, {
+          fecha: date,
+          hora: time,
+          idPaciente: pacienteId,
+          atendido: atendido,
+        });
+
         Alert.alert("Cita añadida", "La cita fue registrada exitosamente.");
         setPacienteId(""); // Reinicia el valor del paciente seleccionado
         navigation.goBack();
-      })
-      .catch((error) => {
-        Alert.alert("Error", error.message);
-      });
+      }
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
   };
 
   const handleAddPaciente = () => {
@@ -183,7 +201,6 @@ export default function NuevaCita() {
       </View>
 
       <View style={styles.SlideRow}>
-        {/* Slider Button */}
         <View style={styles.sliderContainer}>
           <Switch
             value={atendido}
