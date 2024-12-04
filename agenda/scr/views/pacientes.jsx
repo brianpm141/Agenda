@@ -3,7 +3,7 @@ import { View, Text, Button, StyleSheet, FlatList, Alert, TouchableOpacity } fro
 import { getDatabase, ref, get, remove } from 'firebase/database';
 import app from '../utils/firebase';
 import { useNavigation } from '@react-navigation/native';
-import { verificarCitasPaciente } from '../JS/VerificarPacientes';
+import verificarCitasPaciente from '../JS/VerificaPacientes';
 
 // Clase para la pantalla de Pacientes
 export default function Pacientes() {

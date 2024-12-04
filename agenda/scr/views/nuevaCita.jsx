@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   Alert,
+  Switch,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { getDatabase, ref, onValue, push } from "firebase/database";
@@ -19,20 +20,22 @@ import {
   azulMarinoPesado,
   rojo,
   verde,
+  rojoLigero,
+  rojoPesado,
 } from "../../styleColors";
 
 export default function NuevaCita() {
-  
   const [date, setDate] = useState(null);
   const [time, setTime] = useState(null);
   const [pacienteId, setPacienteId] = useState("");
   const [pacientes, setPacientes] = useState([]);
+  const [atendido, setAtendido] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const navigation = useNavigation();
-  
   const route = useRoute();
   const { selectedDay } = route.params || {};
+  const [defaultVisible, setDefaultVisible] = useState(true);
 
   useEffect(() => {
     const db = getDatabase();
@@ -60,7 +63,7 @@ export default function NuevaCita() {
       Alert.alert("Error", "Por favor selecciona una hora.");
       return;
     }
-    if (!pacienteId) {
+    if (pacienteId === "") {
       Alert.alert("Error", "Por favor selecciona un paciente.");
       return;
     }
@@ -72,9 +75,11 @@ export default function NuevaCita() {
       fecha: date,
       hora: time,
       idPaciente: pacienteId,
+      atendido: atendido,
     })
       .then(() => {
         Alert.alert("Cita añadida", "La cita fue registrada exitosamente.");
+        setPacienteId(""); // Reinicia el valor del paciente seleccionado
         navigation.goBack();
       })
       .catch((error) => {
@@ -83,10 +88,11 @@ export default function NuevaCita() {
   };
 
   const handleAddPaciente = () => {
-    navigation.navigate('NuevoPaciente');
+    navigation.navigate("NuevoPaciente");
   };
 
   const handleCancel = () => {
+    setPacienteId(""); // Reinicia el valor del paciente seleccionado
     navigation.goBack();
   };
 
@@ -102,15 +108,22 @@ export default function NuevaCita() {
     if (selectedTime) {
       const hours = selectedTime.getHours();
       const minutes = selectedTime.getMinutes();
-      setTime(`${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`);
+      setTime(
+        `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}`
+      );
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Añadir Nueva Cita</Text>
-      <TouchableOpacity style={styles.picker} onPress={() => setShowDatePicker(true)}>
-        <Text style={styles.pickerText}>{ date || "Seleccionar fecha"}</Text>
+      <TouchableOpacity
+        style={styles.picker}
+        onPress={() => setShowDatePicker(true)}
+      >
+        <Text style={styles.pickerText}>{date || "Seleccionar fecha"}</Text>
       </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker
@@ -121,7 +134,10 @@ export default function NuevaCita() {
         />
       )}
 
-      <TouchableOpacity style={styles.picker} onPress={() => setShowTimePicker(true)}>
+      <TouchableOpacity
+        style={styles.picker}
+        onPress={() => setShowTimePicker(true)}
+      >
         <Text style={styles.pickerText}>{time || "Seleccionar hora"}</Text>
       </TouchableOpacity>
       {showTimePicker && (
@@ -137,19 +153,43 @@ export default function NuevaCita() {
         <View style={styles.pickerBox}>
           <Picker
             selectedValue={pacienteId}
-            onValueChange={(itemValue) => setPacienteId(itemValue)}
+            onValueChange={(itemValue) => {
+              if (itemValue !== "") {
+                setDefaultVisible(false); // Oculta el valor por defecto
+                setPacienteId(itemValue); // Asigna el valor seleccionado
+              }
+            }}
             style={styles.pickerPaciente}
             itemStyle={styles.pickerItem}
           >
-            <Picker.Item label="Seleccionar paciente" value="" />
+            {/* Muestra "Seleccionar paciente" solo si no se ha seleccionado otro */}
+            {defaultVisible && (
+              <Picker.Item label="Seleccionar paciente" value="" />
+            )}
             {pacientes.map((paciente) => (
-              <Picker.Item key={paciente.id} label={paciente.nombre} value={paciente.id} />
+              <Picker.Item
+                key={paciente.id}
+                label={paciente.nombre}
+                value={paciente.id}
+              />
             ))}
           </Picker>
         </View>
-        <TouchableOpacity style={styles.addPacienteButton} onPress={handleAddPaciente}>
-          <Text style={styles.buttonText}>+</Text>
-        </TouchableOpacity>
+      </View>
+
+      <View style={styles.SlideRow}>
+        {/* Slider Button */}
+        <View style={styles.sliderContainer}>
+          <Switch
+            value={atendido}
+            onValueChange={(newValue) => setAtendido(newValue)}
+            trackColor={{ false: rojoLigero, true: azulClaroPrincipal }}
+            thumbColor={atendido ? azulMarinoPesado : "#f4f3f4"}
+          />
+          <Text style={styles.sliderText}>
+            {atendido ? "Atendido" : "Sin atender"}
+          </Text>
+        </View>
       </View>
 
       <View style={styles.buttonContainer}>
@@ -182,7 +222,7 @@ const styles = StyleSheet.create({
     borderColor: azulMarinoPesado,
     borderRadius: 15,
     padding: "5%",
-    marginTop: "10%",
+    marginTop: "5%",
     width: "85%",
     height: "12%",
     backgroundColor: "#f9f9f9",
@@ -193,19 +233,22 @@ const styles = StyleSheet.create({
   },
   pacienteRow: {
     flexDirection: "row",
-    marginTop: "10%",
+    marginTop: "5%",
     maxWidth: "80%",
     height: "12%",
-    padding: 0,
+  },
+  SlideRow: {
+    marginTop: "5%",
+    maxWidth: "80%",
+    height: "12%",
   },
   pickerBox: {
     borderWidth: 1,
     borderColor: azulMarinoPesado,
     borderRadius: 15,
-    width: "70%",
+    width: "100%",
     height: "100%",
     backgroundColor: "#f9f9f9",
-    padding: 0,
   },
   pickerPaciente: {
     flex: 1,
@@ -215,21 +258,19 @@ const styles = StyleSheet.create({
     fontSize: dynamicFontSizeOption,
     color: "#333",
   },
-  addPacienteButton: {
-    marginLeft: "5%",
-    backgroundColor: azulClaroPrincipal,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    width: "25%",
-    height: "100%",
-  },
   buttonContainer: {
-    marginTop: "15%",
+    marginTop: "5%",
     height: "10%",
     flexDirection: "row",
     justifyContent: "space-between",
     width: "80%",
+  },
+  buttonContainerDel: {
+    marginTop: "5%",
+    height: "10%",
+    flexDirection: "row",
+    width: "80%",
+    justifyContent: "center",
   },
   cancelButton: {
     backgroundColor: rojo,
@@ -245,6 +286,14 @@ const styles = StyleSheet.create({
     width: "45%",
     height: "100%",
     alignItems: "center",
+    padding: "4%",
+  },
+  ButtonDel: {
+    backgroundColor: rojoPesado,
+    borderRadius: 10,
+    width: "70%",
+    height: "100%",
+    alignItems: "center",
     padding: "6%",
   },
   buttonText: {
@@ -252,5 +301,17 @@ const styles = StyleSheet.create({
     fontSize: dynamicFontSizeOption,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  sliderContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: "2%",
+    width: "100%",
+  },
+  sliderText: {
+    fontSize: dynamicFontSizeTitle,
+    color: "#333",
+    marginLeft: 10,
   },
 });

@@ -1,7 +1,7 @@
 import { getDatabase, ref, onValue } from "firebase/database";
 
 // Esta función verifica si el paciente tiene citas
-export const verificarCitasPaciente = (idPaciente) => {
+const verificarCitasPaciente = (idPaciente) => {
   const db = getDatabase();
   const citasRef = ref(db, "citas");
   
@@ -23,3 +23,5 @@ export const verificarCitasPaciente = (idPaciente) => {
     });
   });
 };
+
+export default verificarCitasPaciente;

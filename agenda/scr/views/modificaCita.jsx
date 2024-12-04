@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   Alert,
+  Switch,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { getDatabase, ref, update, onValue, remove } from "firebase/database";
@@ -20,6 +21,7 @@ import {
   rojo,
   verde,
   rojoPesado,
+  rojoLigero,
 } from "../../styleColors";
 
 export default function ModificaCita() {
@@ -27,6 +29,7 @@ export default function ModificaCita() {
   const [time, setTime] = useState(null);
   const [pacienteId, setPacienteId] = useState("");
   const [pacientes, setPacientes] = useState([]);
+  const [atendido, setAtendido] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const navigation = useNavigation();
@@ -34,7 +37,7 @@ export default function ModificaCita() {
 
   const { cita } = route.params || {}; // Recibir la cita seleccionada
   console.log(cita);
-  
+
   useEffect(() => {
     const db = getDatabase();
     const pacientesRef = ref(db, "pacientes");
@@ -56,6 +59,7 @@ export default function ModificaCita() {
       setDate(cita.fecha ? new Date(cita.fecha + "T00:00") : null); // Ajustar zona horaria
       setTime(cita.hora || null);
       setPacienteId(cita.idPaciente || "");
+      setAtendido(cita.atendido || false);
     }
   }, [cita]);
 
@@ -84,6 +88,7 @@ export default function ModificaCita() {
       fecha: date.toISOString().split("T")[0], // Formato YYYY-MM-DD
       hora: time, // Hora en formato HH:mm
       idPaciente: pacienteId,
+      atendido: atendido,
     })
       .then(() => {
         Alert.alert("Cita actualizada", "La cita fue modificada exitosamente.");
@@ -117,7 +122,10 @@ export default function ModificaCita() {
 
             remove(citaRef)
               .then(() => {
-                Alert.alert("Cita eliminada", "La cita fue eliminada exitosamente.");
+                Alert.alert(
+                  "Cita eliminada",
+                  "La cita fue eliminada exitosamente."
+                );
                 navigation.goBack();
               })
               .catch((error) => {
@@ -145,7 +153,11 @@ export default function ModificaCita() {
     if (selectedTime) {
       const hours = selectedTime.getHours();
       const minutes = selectedTime.getMinutes();
-      setTime(`${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`);
+      setTime(
+        `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}`
+      );
     }
   };
 
@@ -193,7 +205,6 @@ export default function ModificaCita() {
             style={styles.pickerPaciente}
             itemStyle={styles.pickerItem}
           >
-            <Picker.Item label="Seleccionar paciente" value="" />
             {pacientes.map((paciente) => (
               <Picker.Item
                 key={paciente.id}
@@ -202,6 +213,21 @@ export default function ModificaCita() {
               />
             ))}
           </Picker>
+        </View>
+      </View>
+
+      <View style={styles.SlideRow}>
+        {/* Slider Button */}
+        <View style={styles.sliderContainer}>
+          <Switch
+            value={atendido}
+            onValueChange={(newValue) => setAtendido(newValue)}
+            trackColor={{ false: rojoLigero, true: azulClaroPrincipal }}
+            thumbColor={atendido ? azulMarinoPesado : "#f4f3f4"}
+          />
+          <Text style={styles.sliderText}>
+            {atendido ? "Atendido" : "Sin atender"}
+          </Text>
         </View>
       </View>
 
@@ -214,12 +240,9 @@ export default function ModificaCita() {
         </TouchableOpacity>
       </View>
       <View style={styles.buttonContainerDel}>
-      <TouchableOpacity
-        style={styles.ButtonDel}
-        onPress={handleDeleteCita}
-      >
-        <Text style={styles.buttonText}>Eliminar cita</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.ButtonDel} onPress={handleDeleteCita}>
+          <Text style={styles.buttonText}>Eliminar cita</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -243,7 +266,7 @@ const styles = StyleSheet.create({
     borderColor: azulMarinoPesado,
     borderRadius: 15,
     padding: "5%",
-    marginTop: "10%",
+    marginTop: "5%",
     width: "85%",
     height: "12%",
     backgroundColor: "#f9f9f9",
@@ -254,7 +277,12 @@ const styles = StyleSheet.create({
   },
   pacienteRow: {
     flexDirection: "row",
-    marginTop: "10%",
+    marginTop: "5%",
+    maxWidth: "80%",
+    height: "12%",
+  },
+  SlideRow: {
+    marginTop: "5%",
     maxWidth: "80%",
     height: "12%",
   },
@@ -275,7 +303,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   buttonContainer: {
-    marginTop: "15%",
+    marginTop: "5%",
     height: "10%",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -286,7 +314,7 @@ const styles = StyleSheet.create({
     height: "10%",
     flexDirection: "row",
     width: "80%",
-    justifyContent: 'center'
+    justifyContent: "center",
   },
   cancelButton: {
     backgroundColor: rojo,
@@ -317,5 +345,17 @@ const styles = StyleSheet.create({
     fontSize: dynamicFontSizeOption,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  sliderContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: "2%",
+    width: "100%",
+  },
+  sliderText: {
+    fontSize: dynamicFontSizeTitle,
+    color: "#333",
+    marginLeft: 10,
   },
 });
