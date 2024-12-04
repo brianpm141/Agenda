@@ -3,6 +3,7 @@ import { View, Text, Button, StyleSheet, FlatList, Alert, TouchableOpacity } fro
 import { getDatabase, ref, get, remove } from 'firebase/database';
 import app from '../utils/firebase';
 import { useNavigation } from '@react-navigation/native';
+import { verificarCitasPaciente } from '../JS/VerificarPacientes';
 
 // Clase para la pantalla de Pacientes
 export default function Pacientes() {
@@ -18,7 +19,6 @@ export default function Pacientes() {
       .then(snapshot => {
         if (snapshot.exists()) {
           const data = snapshot.val();
-          console.log('Datos cargados:', data); // Verifica los datos aquí
           const pacientesArray = Object.keys(data).map(key => ({
             id: key,
             ...data[key],
@@ -39,6 +39,12 @@ export default function Pacientes() {
     cargarPacientes();
   }, []);
 
+  // useEffect para actualizar la lista de pacientes cada vez que se elimina un paciente
+  useEffect(() => {
+    // Esta función se ejecutará cuando cambie la lista de pacientes
+    cargarPacientes();
+  }, [pacientes]); // Dependencia de 'pacientes'
+
   const navigateToNuevoPaciente = () => {
     navigation.navigate('Inicio', { screen: 'NuevoPaciente' });
   };
@@ -47,35 +53,57 @@ export default function Pacientes() {
     navigation.navigate('Inicio', { screen: 'ModificaPaciente', params: { paciente } });
   };
 
-  // Función para eliminar un paciente con confirmación
-  const eliminarPaciente = (id) => {
-    Alert.alert(
-      "Eliminar paciente",
-      "¿Estás seguro de que quieres eliminar a este paciente?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel"
-        },
-        {
-          text: "Eliminar",
-          onPress: () => {
-            const db = getDatabase(app);
-            const pacienteRef = ref(db, `pacientes/${id}`);
-            
-            remove(pacienteRef)
-              .then(() => {
-                Alert.alert('Paciente eliminado', 'El paciente ha sido eliminado exitosamente.');
-                setPacientes(pacientes.filter(paciente => paciente.id !== id));
-              })
-              .catch(error => {
-                console.error('Error al eliminar el paciente:', error);
-                Alert.alert('Error', 'No se pudo eliminar el paciente.');
-              });
-          }
-        }
-      ]
-    );
+  const eliminarPaciente = async (id) => {
+    try {
+      // Verificar si el paciente tiene citas asignadas
+      const tieneCitas = await verificarCitasPaciente(id);
+      
+      if (tieneCitas) {
+        Alert.alert(
+          "Acción no permitida",
+          "No se puede eliminar al paciente porque tiene citas asignadas."
+        );
+        return; // Sale de la función si el paciente tiene citas
+      }
+  
+      // Si no tiene citas, confirmamos eliminación
+      Alert.alert(
+        "Eliminar paciente",
+        "¿Estás seguro de que deseas eliminar a este paciente?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Eliminar",
+            onPress: async () => {
+              // Eliminar el paciente de la base de datos
+              const db = getDatabase();
+              const pacienteRef = ref(db, `pacientes/${id}`);
+              await remove(pacienteRef);
+              Alert.alert("Paciente eliminado", "El paciente fue eliminado exitosamente.");
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error("Error al verificar o eliminar al paciente:", error);
+      Alert.alert("Error", "Ocurrió un problema al intentar eliminar al paciente.");
+    }
+  };
+
+  // Función para eliminar un paciente de la base de datos
+  const eliminarPacienteDeBaseDatos = async (id) => {
+    const db = getDatabase(app);
+    const pacienteRef = ref(db, 'pacientes/' + id);
+    
+    try {
+      await remove(pacienteRef);
+      // Actualizamos el estado de pacientes después de eliminar uno
+      setPacientes(prevPacientes => prevPacientes.filter(paciente => paciente.id !== id));
+      Alert.alert('Paciente eliminado', 'El paciente ha sido eliminado correctamente.');
+    } catch (error) {
+      console.error('Error al eliminar el paciente:', error);
+      Alert.alert('Error', 'No se pudo eliminar el paciente.');
+    }
   };
 
   const renderItem = ({ item }) => (
